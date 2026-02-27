@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Librería The Bookshelf in the Cloud</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .contenedor {
+            display: flex;
+            gap: 20px;
+        }
+
+        .panel {
+            flex: 1;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        button {
+            padding: 8px 12px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📚 Librería The Bookshelf in the Cloud</h1>
+
+<div class="contenedor">
+
+    <div class="panel">
+        <h2>Libros Disponibles</h2>
+        <ul id="listaLibros">
+            <li>Los libros aparecerán aquí...</li>
+        </ul>
+    </div>
+
+    <div class="panel">
+        <h2>Carrito</h2>
+        <ul id="carrito">
+            <li>Tu carrito está vacío</li>
+        </ul>
+        <button onclick="finalizarCompra()">Finalizar Compra</button>
+    </div>
+
+</div>
+
+<script>
+    let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+    actualizarCarrito();
+
+    fetch("/libros")
+        .then(response => response.json())
+        .then(data => {
+            const lista = document.getElementById("listaLibros");
+            lista.innerHTML = "";
+
+            data.forEach(libro => {
+                const li = document.createElement("li");
+                li.textContent = libro.titulo + " - $" + libro.precio + " ";
+
+                const boton = document.createElement("button");
+                boton.textContent = "Agregar";
+                boton.onclick = () => agregarAlCarrito(libro);
+
+                li.appendChild(boton);
+                lista.appendChild(li);
+            });
+        });
+
+    function agregarAlCarrito(libro) {
+        carrito.push(libro);
+        actualizarCarrito();
+    }
+
+    function actualizarCarrito() {
+    const listaCarrito = document.getElementById("carrito");
+    listaCarrito.innerHTML = "";
+
+    if (carrito.length === 0) {
+        listaCarrito.innerHTML = "<li>Tu carrito está vacío</li>";
+        return;
+    }
+
+    let total = 0;
+
+    carrito.forEach((libro, index) => {
+    const li = document.createElement("li");
+    li.textContent = libro.titulo + " - $" + libro.precio + " ";
+
+    const botonEliminar = document.createElement("button");
+    botonEliminar.textContent = "❌";
+    botonEliminar.onclick = () => {
+        carrito.splice(index, 1);
+        actualizarCarrito();
+    };
+
+    li.appendChild(botonEliminar);
+    listaCarrito.appendChild(li);
+
+    total += libro.precio;
+});
+
+    const totalElemento = document.createElement("li");
+    totalElemento.innerHTML = "<strong>Total: $" + total.toFixed(2) + "</strong>";
+    listaCarrito.appendChild(totalElemento);
+
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+}
+
+    function finalizarCompra() {
+    if (carrito.length === 0) {
+        alert("Tu carrito está vacío 😅");
+        return;
+    }
+
+    alert("¡Gracias por tu compra! 🎉");
+
+    carrito = [];
+    actualizarCarrito();
+}
+
+</script>
+
+</body>
+</html>
