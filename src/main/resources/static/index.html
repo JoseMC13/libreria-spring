@@ -61,12 +61,9 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
     let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-    const API_BASE = "https://REEMPLAZA-ESTA-URL.onrender.com";
-    const API_URL = API_BASE && API_BASE !== "https://REEMPLAZA-ESTA-URL.onrender.com"
-        ? API_BASE.replace(/\/$/, "")
-        : "";
 
     actualizarCarrito();
 
@@ -164,39 +161,10 @@
         }
 
         const items = agruparCarrito();
-
-        fetch((API_URL ? API_URL : "") + "/compra/comprobante", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ items })
-        })
-            .then(respuesta => {
-                if (!respuesta.ok) {
-                    return respuesta.text().then(texto => {
-                        throw new Error("Error " + respuesta.status + ": " + texto);
-                    });
-                }
-                return respuesta.blob();
-            })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = "comprobante.pdf";
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                URL.revokeObjectURL(url);
-
-                alert("Gracias por tu compra!");
-                carrito = [];
-                actualizarCarrito();
-            })
-            .catch(error => {
-                alert("No se pudo generar el comprobante. " + error.message);
-            });
+        generarComprobantePdf(items);
+        alert("Gracias por tu compra!");
+        carrito = [];
+        actualizarCarrito();
     }
 
     function agruparCarrito() {
@@ -213,6 +181,58 @@
             mapa.get(clave).cantidad += 1;
         });
         return Array.from(mapa.values());
+    }
+
+    function generarComprobantePdf(items) {
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            alert("No se pudo cargar la libreria de PDF.");
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        let y = 20;
+
+        doc.setFontSize(16);
+        doc.text("Comprobante de compra", 14, y);
+        y += 10;
+
+        doc.setFontSize(11);
+        const fecha = new Date().toLocaleString("es-MX");
+        doc.text("Fecha: " + fecha, 14, y);
+        y += 10;
+
+        doc.setFontSize(12);
+        doc.text("Detalle de libros:", 14, y);
+        y += 8;
+
+        doc.setFontSize(11);
+        let total = 0;
+        if (items.length === 0) {
+            doc.text("No hay libros en la compra.", 14, y);
+            y += 8;
+        } else {
+            items.forEach(item => {
+                const subtotal = item.precioUnitario * item.cantidad;
+                total += subtotal;
+                const linea = "- " + item.titulo +
+                    " | Cantidad: " + item.cantidad +
+                    " | Precio: $" + item.precioUnitario.toFixed(2) +
+                    " | Subtotal: $" + subtotal.toFixed(2);
+                doc.text(linea, 14, y);
+                y += 7;
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+            });
+        }
+
+        y += 6;
+        doc.setFontSize(12);
+        doc.text("Total: $" + total.toFixed(2), 14, y);
+
+        doc.save("comprobante.pdf");
     }
 
 </script>
