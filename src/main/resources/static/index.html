@@ -63,6 +63,10 @@
 
 <script>
     let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+    const API_BASE = "https://REEMPLAZA-ESTA-URL.onrender.com";
+    const API_URL = API_BASE && API_BASE !== "https://REEMPLAZA-ESTA-URL.onrender.com"
+        ? API_BASE.replace(/\/$/, "")
+        : "";
 
     actualizarCarrito();
 
@@ -161,7 +165,7 @@
 
         const items = agruparCarrito();
 
-        fetch("/compra/comprobante", {
+        fetch((API_URL ? API_URL : "") + "/compra/comprobante", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
