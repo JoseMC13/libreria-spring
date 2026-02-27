@@ -159,10 +159,56 @@
             return;
         }
 
-        alert("Gracias por tu compra!");
+        const items = agruparCarrito();
 
-        carrito = [];
-        actualizarCarrito();
+        fetch("/compra/comprobante", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ items })
+        })
+            .then(respuesta => {
+                if (!respuesta.ok) {
+                    return respuesta.text().then(texto => {
+                        throw new Error("Error " + respuesta.status + ": " + texto);
+                    });
+                }
+                return respuesta.blob();
+            })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "comprobante.pdf";
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+
+                alert("Gracias por tu compra!");
+                carrito = [];
+                actualizarCarrito();
+            })
+            .catch(error => {
+                alert("No se pudo generar el comprobante. " + error.message);
+            });
+    }
+
+    function agruparCarrito() {
+        const mapa = new Map();
+        carrito.forEach(libro => {
+            const clave = libro.titulo;
+            if (!mapa.has(clave)) {
+                mapa.set(clave, {
+                    titulo: libro.titulo,
+                    precioUnitario: libro.precio,
+                    cantidad: 0
+                });
+            }
+            mapa.get(clave).cantidad += 1;
+        });
+        return Array.from(mapa.values());
     }
 
 </script>
