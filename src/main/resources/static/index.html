@@ -37,7 +37,10 @@
 </head>
 <body>
 
-<h1>📚 Librería The Bookshelf in the Cloud</h1>
+<h1>
+    <img src="img/logo.jpg" alt="Logo Librería" style="height:100px; vertical-align:middle; margin-right:10px;">
+    Librería The Bookshelf in the Cloud
+</h1>
 
 <div class="contenedor">
 
@@ -69,17 +72,28 @@
             const lista = document.getElementById("listaLibros");
             lista.innerHTML = "";
 
-            data.forEach(libro => {
-                const li = document.createElement("li");
-                li.textContent = libro.titulo + " - $" + libro.precio + " ";
+           data.forEach(libro => {
+    const li = document.createElement("li");
 
-                const boton = document.createElement("button");
-                boton.textContent = "Agregar";
-                boton.onclick = () => agregarAlCarrito(libro);
+    const img = document.createElement("img");
+    img.src = "/img/" + libro.imagen;
+    img.width = 80;
+    img.style.verticalAlign = "middle";
+    img.style.marginRight = "10px";
 
-                li.appendChild(boton);
-                lista.appendChild(li);
-            });
+    const texto = document.createElement("span");
+    texto.textContent = libro.titulo + " - $" + libro.precio + " ";
+
+    const boton = document.createElement("button");
+    boton.textContent = "Agregar";
+    boton.onclick = () => agregarAlCarrito(libro);
+
+    li.appendChild(img);
+    li.appendChild(texto);
+    li.appendChild(boton);
+
+    lista.appendChild(li);
+});
         });
 
     function agregarAlCarrito(libro) {
