@@ -1,5 +1,6 @@
 package com.example.proyecto;
 
+
 public class CompraItem {
     private String titulo;
     private double precioUnitario;
