@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Librer&iacute;a The Bookshelf in the Cloud</title>
+    <title>Libreria The Bookshelf in the Cloud</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,6 +28,11 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
+        #listaLibros li {
+            margin-bottom: 10px;
+            list-style: none;
+        }
+
         button {
             padding: 8px 12px;
             margin-top: 10px;
@@ -38,81 +43,93 @@
 <body>
 
 <h1>
-    <img src="img/logo.jpg" alt="Logo Librer&iacute;a" style="height:100px; vertical-align:middle; margin-right:10px;">
-    Librer&iacute;a The Bookshelf in the Cloud
+    <img src="img/logo.jpg" alt="Logo Libreria" style="height:100px; vertical-align:middle; margin-right:10px;">
+    Libreria The Bookshelf in the Cloud
 </h1>
 
 <div class="contenedor">
-
     <div class="panel">
         <h2>Libros Disponibles</h2>
         <ul id="listaLibros">
-            <li>Los libros aparecer&aacute;n aqu&iacute;...</li>
+            <li>Cargando libros...</li>
         </ul>
     </div>
 
     <div class="panel">
         <h2>Carrito</h2>
         <ul id="carrito">
-            <li>Tu carrito est&aacute; vac&iacute;o</li>
+            <li>Tu carrito esta vacio</li>
         </ul>
         <button onclick="finalizarCompra()">Finalizar Compra</button>
     </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
-    let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-
-    actualizarCarrito();
-
     const libros = [
-        {
-            titulo: "El Principito",
-            precio: 10.99,
-            imagen: "elprincipito.jpg",
-            sinopsis: "Un piloto conoce a un pequeno principe en el desierto."
-        },
-        {
-            titulo: "Cien Anos de Soledad",
-            precio: 15.50,
-            imagen: "cienaniosdesoledad.jpg",
-            sinopsis: "Historia de la familia Buendia en Macondo."
-        },
-        {
-            titulo: "Clean Code",
-            precio: 40.00,
-            imagen: "cleancode.jpg",
-            sinopsis: "Guia para escribir codigo limpio y profesional."
-        }
+        { titulo: "Primer Java", autor: "Kathy Sierra", paginas: 300, stock: 5, precio: 15.00, imagen: "primer-java.jpg" },
+        { titulo: "Comenzando a programar con Java para Dummies", autor: "Barry Burd", paginas: 450, stock: 3, precio: 22.50, imagen: "comenzando-java-dummies.jpg" },
+        { titulo: "Java: conceptos basicos de programacion para principiantes", autor: "Nathan Clark", paginas: 600, stock: 4, precio: 30.00, imagen: "java-conceptos-basicos.jpg" },
+        { titulo: "Java: una guia para principiantes", autor: "Herbert Schildt", paginas: 200, stock: 10, precio: 10.00, imagen: "java-guia-principiantes.jpg" },
+        { titulo: "Core Java Volumen I", autor: "Cay S. Horstman", paginas: 200, stock: 3, precio: 10.00, imagen: "core-java-vol-1.jpg" },
+        { titulo: "Think Java: Como pensar como un cientifico informatico", autor: "Allen B. Downey", paginas: 550, stock: 8, precio: 27.50, imagen: "think-java.jpg" },
+        { titulo: "Java efectivo", autor: "Joshua Bloch", paginas: 250, stock: 7, precio: 12.50, imagen: "java-efectivo.jpg" },
+        { titulo: "Java: la referencia completa", autor: "Herbert Schildt", paginas: 700, stock: 13, precio: 35.00, imagen: "java-referencia-completa.jpg" },
+        { titulo: "Java 8 en accion", autor: "Alan Mycroft", paginas: 400, stock: 5, precio: 20.00, imagen: "java-8-en-accion.jpg" },
+        { titulo: "Pensando en Java", autor: "Bruce Eckel", paginas: 300, stock: 4, precio: 15.00, imagen: "pensando-en-java.jpg" },
+        { titulo: "Aprender Java mediante la creacion de juegos para Android", autor: "Jonh Horton", paginas: 800, stock: 4, precio: 40.00, imagen: "java-juegos-android.jpg" },
+        { titulo: "Java en pocas palabras", autor: "Ben Evans", paginas: 200, stock: 2, precio: 10.00, imagen: "java-en-pocas-palabras.jpg" },
+        { titulo: "Core Java para los impacientes", autor: "Cay S. Horstmann", paginas: 450, stock: 11, precio: 22.50, imagen: "core-java-impacientes.jpg" },
+        { titulo: "Java: una introduccion a la programacion del mundo real", autor: "Marc Loy", paginas: 250, stock: 8, precio: 12.50, imagen: "java-introduccion-mundo-real.jpg" },
+        { titulo: "Asimilando la entrevista de Java", autor: "Javin Paul", paginas: 500, stock: 6, precio: 25.00, imagen: "asimilando-entrevista-java.jpg" },
+        { titulo: "El sistema de modulos de Java", autor: "Nikolai Parlog", paginas: 300, stock: 14, precio: 15.00, imagen: "sistema-modulos-java.jpg" },
+        { titulo: "Java moderno en accion", autor: "Mario Fusco", paginas: 400, stock: 7, precio: 20.00, imagen: "java-moderno-en-accion.jpg" },
+        { titulo: "Problemas clasicos de informatica en Java", autor: "David Kopec", paginas: 500, stock: 4, precio: 25.00, imagen: "problemas-clasicos-java.jpg" },
+        { titulo: "Aprende a hacer codigo", autor: "Eric Freeman", paginas: 400, stock: 5, precio: 20.00, imagen: "aprende-a-hacer-codigo.jpg" },
+        { titulo: "Manual de artesania de software agil", autor: "Robert C. Martin", paginas: 200, stock: 7, precio: 10.00, imagen: "manual-software-agil.jpg" },
+        { titulo: "El lenguaje oculto del hardware y el software informatico", autor: "Charles Petzold", paginas: 700, stock: 10, precio: 35.00, imagen: "lenguaje-oculto-hardware-software.jpg" },
+        { titulo: "Entrevista de Cracking the Coding", autor: "Gayle Laakmann McDowell", paginas: 350, stock: 4, precio: 17.50, imagen: "cracking-the-coding.jpg" },
+        { titulo: "Algoritmos de Grokking: una guia ilustrada para programadores", autor: "Aditya Y. Bhargava", paginas: 600, stock: 2, precio: 30.00, imagen: "grokking-algoritmos.jpg" },
+        { titulo: "Introduccion a los algoritmos", autor: "Thomas H. Cormen", paginas: 450, stock: 7, precio: 22.50, imagen: "introduccion-algoritmos.jpg" },
+        { titulo: "Piense en estructuras de datos", autor: "Allen B. Downey", paginas: 550, stock: 17, precio: 27.50, imagen: "piense-estructuras-datos.jpg" }
     ];
 
-    const lista = document.getElementById("listaLibros");
-    lista.innerHTML = "";
+    let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+    actualizarCarrito();
+    renderizarLibros();
 
-    libros.forEach(libro => {
-        const li = document.createElement("li");
+    function renderizarLibros() {
+        const lista = document.getElementById("listaLibros");
+        lista.innerHTML = "";
 
-        const img = document.createElement("img");
-        img.src = "img/" + libro.imagen;
-        img.width = 80;
-        img.style.verticalAlign = "middle";
-        img.style.marginRight = "10px";
+        libros.forEach(libro => {
+            const li = document.createElement("li");
 
-        const texto = document.createElement("span");
-        texto.textContent = libro.titulo + " - $" + libro.precio + " ";
+            if (libro.imagen) {
+                const img = document.createElement("img");
+                img.src = "img/" + libro.imagen;
+                img.width = 80;
+                img.style.verticalAlign = "middle";
+                img.style.marginRight = "10px";
+                img.onerror = () => { img.style.display = "none"; };
+                li.appendChild(img);
+            }
 
-        const boton = document.createElement("button");
-        boton.textContent = "Agregar";
-        boton.onclick = () => agregarAlCarrito(libro);
+            const texto = document.createElement("span");
+            texto.textContent = libro.titulo + " - $" + libro.precio.toFixed(2) +
+                " | Autor: " + libro.autor +
+                " | Paginas: " + libro.paginas +
+                " | Stock: " + libro.stock + " ";
 
-        li.appendChild(img);
-        li.appendChild(texto);
-        li.appendChild(boton);
+            const boton = document.createElement("button");
+            boton.textContent = "Agregar";
+            boton.onclick = () => agregarAlCarrito({ titulo: libro.titulo, precio: libro.precio });
 
-        lista.appendChild(li);
-    });
+            li.appendChild(texto);
+            li.appendChild(boton);
+            lista.appendChild(li);
+        });
+    }
 
     function agregarAlCarrito(libro) {
         carrito.push(libro);
@@ -124,7 +141,8 @@
         listaCarrito.innerHTML = "";
 
         if (carrito.length === 0) {
-            listaCarrito.innerHTML = "<li>Tu carrito est&aacute; vac&iacute;o</li>";
+            listaCarrito.innerHTML = "<li>Tu carrito esta vacio</li>";
+            localStorage.setItem("carrito", JSON.stringify(carrito));
             return;
         }
 
@@ -132,7 +150,7 @@
 
         carrito.forEach((libro, index) => {
             const li = document.createElement("li");
-            li.textContent = libro.titulo + " - $" + libro.precio + " ";
+            li.textContent = libro.titulo + " - $" + Number(libro.precio).toFixed(2) + " ";
 
             const botonEliminar = document.createElement("button");
             botonEliminar.textContent = "X";
@@ -144,7 +162,7 @@
             li.appendChild(botonEliminar);
             listaCarrito.appendChild(li);
 
-            total += libro.precio;
+            total += Number(libro.precio) || 0;
         });
 
         const totalElemento = document.createElement("li");
@@ -174,7 +192,7 @@
             if (!mapa.has(clave)) {
                 mapa.set(clave, {
                     titulo: libro.titulo,
-                    precioUnitario: libro.precio,
+                    precioUnitario: Number(libro.precio) || 0,
                     cantidad: 0
                 });
             }
@@ -234,7 +252,6 @@
 
         doc.save("comprobante.pdf");
     }
-
 </script>
 
 </body>

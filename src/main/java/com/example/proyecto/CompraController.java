@@ -1,10 +1,12 @@
 package com.example.proyecto;
 
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,9 @@ import java.util.List;
 
 @RestController
 public class CompraController {
+    private static final PDType1Font FONT_HELVETICA = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+    private static final PDType1Font FONT_HELVETICA_BOLD = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
+
 
     @PostMapping("/compra/comprobante")
     public ResponseEntity<byte[]> generarComprobante(@RequestBody CompraRequest request) throws IOException {
@@ -48,17 +53,17 @@ public class CompraController {
                 float y = page.getMediaBox().getHeight() - margin;
                 float leading = 16f;
 
-                content.setFont(PDType1Font.HELVETICA_BOLD, 16);
+                content.setFont(FONT_HELVETICA_BOLD, 16);
                 y = escribirLinea(content, "Comprobante de compra", margin, y, leading);
 
-                content.setFont(PDType1Font.HELVETICA, 11);
+                content.setFont(FONT_HELVETICA, 11);
                 String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
                 y = escribirLinea(content, "Fecha: " + fecha, margin, y, leading);
                 y = escribirLinea(content, "", margin, y, leading);
 
-                content.setFont(PDType1Font.HELVETICA_BOLD, 12);
+                content.setFont(FONT_HELVETICA_BOLD, 12);
                 y = escribirLinea(content, "Detalle de libros:", margin, y, leading);
-                content.setFont(PDType1Font.HELVETICA, 11);
+                content.setFont(FONT_HELVETICA, 11);
 
                 BigDecimal total = BigDecimal.ZERO;
                 if (items.isEmpty()) {
@@ -79,7 +84,7 @@ public class CompraController {
                 }
 
                 y = escribirLinea(content, "", margin, y, leading);
-                content.setFont(PDType1Font.HELVETICA_BOLD, 12);
+                content.setFont(FONT_HELVETICA_BOLD, 12);
                 escribirLinea(content, "Total: $" + total.setScale(2, RoundingMode.HALF_UP), margin, y, leading);
             }
 
