@@ -3,7 +3,7 @@
 <head>
 
     <meta charset="UTF-8">
-    <title>Librer&iacute;a The Bookshelf in the Cloud</title>
+    <title>Libreria The Bookshelf in the Cloud</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,8 +39,8 @@
 <body>
 
 <h1>
-    <img src="img/logo.jpg" alt="Logo Librer&iacute;a" style="height:100px; vertical-align:middle; margin-right:10px;">
-    Librer&iacute;a The Bookshelf in the Cloud
+    <img src="img/logo.jpg" alt="Logo Libreria" style="height:100px; vertical-align:middle; margin-right:10px;">
+    Libreria The Bookshelf in the Cloud
 </h1>
 
 <div class="contenedor">
@@ -48,14 +48,14 @@
     <div class="panel">
         <h2>Libros Disponibles</h2>
         <ul id="listaLibros">
-            <li>Los libros aparecer&aacute;n aqu&iacute;...</li>
+            <li>Cargando libros...</li>
         </ul>
     </div>
 
     <div class="panel">
         <h2>Carrito</h2>
         <ul id="carrito">
-            <li>Tu carrito est&aacute; vac&iacute;o</li>
+            <li>Tu carrito esta vacio</li>
         </ul>
         <button onclick="finalizarCompra()">Finalizar Compra</button>
     </div>
@@ -65,55 +65,71 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
     let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+    let libros = [];
 
     actualizarCarrito();
+    cargarLibros();
 
-    const libros = [
-        {
-            titulo: "El Principito",
-            precio: 10.99,
-            imagen: "elprincipito.jpg",
-            sinopsis: "Un piloto conoce a un pequeno principe en el desierto."
-        },
-        {
-            titulo: "Cien Anos de Soledad",
-            precio: 15.50,
-            imagen: "cienaniosdesoledad.jpg",
-            sinopsis: "Historia de la familia Buendia en Macondo."
-        },
-        {
-            titulo: "Clean Code",
-            precio: 40.00,
-            imagen: "cleancode.jpg",
-            sinopsis: "Guia para escribir codigo limpio y profesional."
+    async function cargarLibros() {
+        const lista = document.getElementById("listaLibros");
+        lista.innerHTML = "<li>Cargando libros...</li>";
+
+        try {
+            const response = await fetch("/libros");
+            if (!response.ok) {
+                throw new Error("No se pudo obtener la lista de libros.");
+            }
+
+            libros = await response.json();
+            renderizarLibros(libros);
+        } catch (error) {
+            lista.innerHTML = "<li>No se pudieron cargar los libros.</li>";
+            console.error(error);
         }
-    ];
+    }
 
-    const lista = document.getElementById("listaLibros");
-    lista.innerHTML = "";
+    function renderizarLibros(data) {
+        const lista = document.getElementById("listaLibros");
+        lista.innerHTML = "";
 
-    libros.forEach(libro => {
-        const li = document.createElement("li");
+        if (!Array.isArray(data) || data.length === 0) {
+            lista.innerHTML = "<li>No hay libros disponibles.</li>";
+            return;
+        }
 
-        const img = document.createElement("img");
-        img.src = "img/" + libro.imagen;
-        img.width = 80;
-        img.style.verticalAlign = "middle";
-        img.style.marginRight = "10px";
+        data.forEach(libro => {
+            const li = document.createElement("li");
 
-        const texto = document.createElement("span");
-        texto.textContent = libro.titulo + " - $" + libro.precio + " ";
+            if (libro.imagen) {
+                const img = document.createElement("img");
+                img.src = "img/" + libro.imagen;
+                img.onerror = () => { img.style.display = "none"; };
+                img.width = 80;
+                img.style.verticalAlign = "middle";
+                img.style.marginRight = "10px";
+                li.appendChild(img);
+            }
 
-        const boton = document.createElement("button");
-        boton.textContent = "Agregar";
-        boton.onclick = () => agregarAlCarrito(libro);
+            const precio = Number(libro.precio) || 0;
+            const autor = libro.autor ? " | Autor: " + libro.autor : "";
+            const paginas = Number.isFinite(libro.paginas) && libro.paginas > 0 ? " | Paginas: " + libro.paginas : "";
+            const stock = Number.isFinite(libro.stock) ? " | Stock: " + libro.stock : "";
 
-        li.appendChild(img);
-        li.appendChild(texto);
-        li.appendChild(boton);
+            const texto = document.createElement("span");
+            texto.textContent = libro.titulo + " - $" + precio.toFixed(2) + autor + paginas + stock + " ";
 
-        lista.appendChild(li);
-    });
+            const boton = document.createElement("button");
+            boton.textContent = "Agregar";
+            boton.onclick = () => agregarAlCarrito({
+                titulo: libro.titulo,
+                precio: precio
+            });
+
+            li.appendChild(texto);
+            li.appendChild(boton);
+            lista.appendChild(li);
+        });
+    }
 
     function agregarAlCarrito(libro) {
         carrito.push(libro);
@@ -125,7 +141,8 @@
         listaCarrito.innerHTML = "";
 
         if (carrito.length === 0) {
-            listaCarrito.innerHTML = "<li>Tu carrito est&aacute; vac&iacute;o</li>";
+            listaCarrito.innerHTML = "<li>Tu carrito esta vacio</li>";
+            localStorage.setItem("carrito", JSON.stringify(carrito));
             return;
         }
 
@@ -145,7 +162,7 @@
             li.appendChild(botonEliminar);
             listaCarrito.appendChild(li);
 
-            total += libro.precio;
+            total += Number(libro.precio) || 0;
         });
 
         const totalElemento = document.createElement("li");
@@ -175,7 +192,7 @@
             if (!mapa.has(clave)) {
                 mapa.set(clave, {
                     titulo: libro.titulo,
-                    precioUnitario: libro.precio,
+                    precioUnitario: Number(libro.precio) || 0,
                     cantidad: 0
                 });
             }
